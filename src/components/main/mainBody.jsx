@@ -4,6 +4,7 @@ import { handleFileUpload } from "../modules/fileHandlers";
 import { lexicalAnalysis } from "../modules/lexicalAnalysis";
 import { syntaxAnalysis } from "../modules/syntaxAnalysis"; 
 import { resetAnalysis } from "../modules/resetFunction";
+import { semanticAnalysis } from "../modules/semanticAnalysis";
 
 const MainBody = () => {
   const [fileContent, setFileContent] = useState("");
@@ -11,6 +12,7 @@ const MainBody = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isLexicalAnalyzed, setIsLexicalAnalyzed] = useState(false);
   const [isSyntaxAnalyzed, setIsSyntaxAnalyzed] = useState(false);
+  const [isSemanticAnalyzed, setIsSemanticAnalyzed] = useState(false);
 
   const handleButtonClick = () => document.getElementById("file-upload")?.click();
 
@@ -62,6 +64,7 @@ const MainBody = () => {
           variant="main"
           size="sm"
           disabled={!isSyntaxAnalyzed}
+          onClick={() => semanticAnalysis(fileContent, setAnalysisResult, setIsSemanticAnalyzed)}
         >
           Semantic Analysis
         </Button>
