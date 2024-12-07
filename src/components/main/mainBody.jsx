@@ -24,7 +24,8 @@ const MainBody = () => {
 
   const formatFileContent = (content) => {
     return content.split("\n").map((line, index) => (
-      <p key={index}>{line}</p>
+      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+<p key={index}>{line}</p>
     ));
   };
 

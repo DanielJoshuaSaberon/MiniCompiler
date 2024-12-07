@@ -1,7 +1,7 @@
 export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnalyzed) => {
-  const keywords = ["int", "String", "boolean", "float", "double", "char", "if", "else", "return", "true", "false"];
-  const operators = ["=", "==", "!=", "<", ">", "<=", ">=", "+", "-", "*", "/"];
-  const punctuators = ["(", ")", "{", "}", ";"];
+  const keywords = ["int", "String", "boolean", "float", "double", "char"];
+  const operators = ["="];
+  const punctuators = [";", " "];
 
   const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
   const integerPattern = /^[0-9]+$/;
@@ -9,6 +9,7 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
   const doublePattern = /^[0-9]*\.[0-9]{1,15}$/;
   const stringPattern = /^"[^"]*"$/;
   const charPattern = /^'[^']{1}'$/;
+  const booleanPattern = /^(true|false)$/;
 
   const lines = fileContent?.split("\n") || [];
   let allValid = true;
@@ -24,6 +25,7 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
     DOUBLE: "DOUBLE", 
     STRING: "STRING",
     CHAR: "CHAR",
+    BOOLEAN: "BOOLEAN",
     PUNCTUATOR: "PUNCTUATOR",
     ERROR: "ERROR",
   };
@@ -63,6 +65,10 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
       currentState = states.CHAR;
       return true;
     }
+    if (booleanPattern.test(token)) {
+      currentState = states.BOOLEAN;
+      return true;
+    }
     if (identifierPattern.test(token)) {
       currentState = states.IDENTIFIER;
       return true;
@@ -78,7 +84,7 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
       case "String":
         return stringPattern.test(value);
       case "boolean":
-        return value === "true" || value === "false";
+        return booleanPattern.test(value);
       case "float":
         return floatPattern.test(value);
       case "double": 
@@ -95,7 +101,7 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
     if (trimmedLine === "") continue;
 
     const tokens = trimmedLine
-      .split(/(\s+|;|\{|\}|\(|\)|\+|\-|\*|\/|==|!=|<=|>=|\=)/)
+      .split(/(\s+|;|\{|\}|\(|\)|==|!=|<=|>=|\=)/)
       .filter((token) => token.trim() !== "");
 
     let currentKeyword = "";
@@ -136,4 +142,3 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
     setAnalysisResult(`Lexical analysis failed. Error: ${errorReason}`);
   }
 };
-//Final Working Code --Sab

@@ -41,7 +41,7 @@ export const syntaxAnalysis = (fileContent, setAnalysisResult, setIsSyntaxAnalyz
       }
 
       if (semicolon !== ";") {
-        return `Missing or misplaced semicolon after assignment`;
+        return "Missing or misplaced semicolon after assignment";
       }
     } else if (tokens[2] === ";") {
       return null;
