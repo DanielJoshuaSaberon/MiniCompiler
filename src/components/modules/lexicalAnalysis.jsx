@@ -1,7 +1,7 @@
 export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnalyzed) => {
   const keywords = ["int", "String", "boolean", "float", "double", "char"];
   const operators = ["="];
-  const punctuators = [";", " "];
+  const punctuators = [";"];
 
   const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
   const integerPattern = /^[0-9]+$/;
@@ -15,70 +15,51 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
   let allValid = true;
   let errorReason = "";
 
-  const states = {
-    START: "START",
-    KEYWORD: "KEYWORD",
-    OPERATOR: "OPERATOR",
-    IDENTIFIER: "IDENTIFIER",
-    INTEGER: "INTEGER",
-    FLOAT: "FLOAT",
-    DOUBLE: "DOUBLE", 
-    STRING: "STRING",
-    CHAR: "CHAR",
-    BOOLEAN: "BOOLEAN",
-    PUNCTUATOR: "PUNCTUATOR",
-    ERROR: "ERROR",
-  };
-
-  let currentState = states.START;
-
-  const processToken = (token) => {
-    if (keywords.includes(token)) {
-      currentState = states.KEYWORD;
-      return true;
-    }
-    if (operators.includes(token)) {
-      currentState = states.OPERATOR;
-      return true;
-    }
-    if (punctuators.includes(token)) {
-      currentState = states.PUNCTUATOR;
-      return true;
-    }
-    if (integerPattern.test(token)) {
-      currentState = states.INTEGER;
-      return true;
-    }
-    if (floatPattern.test(token)) {
-      currentState = states.FLOAT;
-      return true;
-    }
-    if (doublePattern.test(token)) { 
-      currentState = states.DOUBLE;
-      return true;
-    }
-    if (stringPattern.test(token)) {
-      currentState = states.STRING;
-      return true;
-    }
-    if (charPattern.test(token)) {
-      currentState = states.CHAR;
-      return true;
-    }
-    if (booleanPattern.test(token)) {
-      currentState = states.BOOLEAN;
-      return true;
-    }
-    if (identifierPattern.test(token)) {
-      currentState = states.IDENTIFIER;
-      return true;
-    }
-    currentState = states.ERROR;
+  const validateToken = (token) => {
+    if (keywords.includes(token)) return true;
+    if (operators.includes(token)) return true;
+    if (punctuators.includes(token)) return true;
+    if (identifierPattern.test(token)) return true;
+    if (integerPattern.test(token)) return true;
+    if (floatPattern.test(token)) return true;
+    if (doublePattern.test(token)) return true;
+    if (stringPattern.test(token)) return true;
+    if (charPattern.test(token)) return true;
+    if (booleanPattern.test(token)) return true;
     return false;
   };
 
-  const validateAssignmentValue = (keyword, value) => {
-    switch (keyword) {
+  const validateDeclarationTokens = (tokens) => {
+    if (tokens.length < 3) return `Incomplete declaration: '${tokens.join(" ")}'`;
+
+    const [type, identifier, assignmentOrPunctuator] = tokens;
+
+    if (!keywords.includes(type)) return `Invalid type: '${type}'`;
+
+    if (!identifierPattern.test(identifier)) return `Invalid identifier: '${identifier}'`;
+
+    if (assignmentOrPunctuator === "=") {
+      if (tokens.length < 5) return `Incomplete assignment for '${identifier}'`;
+
+      const value = tokens[3];
+      const semicolon = tokens[4];
+
+      if (!validateAssignmentValue(type, value)) {
+        return `Invalid value '${value}' for type '${type}'`;
+      }
+
+      if (semicolon !== ";") return "Missing or misplaced semicolon after assignment";
+    } else if (assignmentOrPunctuator === ";") {
+      return null;
+    } else {
+      return `Unexpected token '${assignmentOrPunctuator}' after identifier`;
+    }
+
+    return null;
+  };
+
+  const validateAssignmentValue = (type, value) => {
+    switch (type) {
       case "int":
         return integerPattern.test(value);
       case "String":
@@ -87,7 +68,7 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
         return booleanPattern.test(value);
       case "float":
         return floatPattern.test(value);
-      case "double": 
+      case "double":
         return doublePattern.test(value);
       case "char":
         return charPattern.test(value);
@@ -101,38 +82,25 @@ export const lexicalAnalysis = (fileContent, setAnalysisResult, setIsLexicalAnal
     if (trimmedLine === "") continue;
 
     const tokens = trimmedLine
-      .split(/(\s+|;|\{|\}|\(|\)|==|!=|<=|>=|\=)/)
+      .split(/(\s+|;|=)/)
       .filter((token) => token.trim() !== "");
 
-    let currentKeyword = "";
-
     for (const token of tokens) {
-      if (keywords.includes(token)) {
-        currentKeyword = token;
-        if (!processToken(token)) {
-          allValid = false;
-          errorReason = `Invalid keyword: ${token}`;
-          break;
-        }
-      }
-
-      if (currentKeyword && token === "=") {
-        const nextToken = tokens[tokens.indexOf(token) + 1];
-        if (!validateAssignmentValue(currentKeyword, nextToken)) {
-          allValid = false;
-          errorReason = `Invalid value for ${currentKeyword}: ${nextToken}`;
-          break;
-        }
-      }
-
-      if (!processToken(token)) {
+      if (!validateToken(token)) {
         allValid = false;
-        errorReason = `Invalid token: ${token}`;
+        errorReason = `Invalid token: '${token}'`;
         break;
       }
     }
 
     if (!allValid) break;
+
+    const error = validateDeclarationTokens(tokens);
+    if (error) {
+      allValid = false;
+      errorReason = error;
+      break;
+    }
   }
 
   if (allValid) {
