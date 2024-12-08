@@ -3,11 +3,6 @@ export const syntaxAnalysis = (fileContent, setAnalysisResult, setIsSyntaxAnalyz
   const assignmentOperator = "=";
 
   const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-  const integerPattern = /^[0-9]+$/;
-  const floatPattern = /^[0-9]*\.[0-9]{1,7}[fF]?$/; 
-  const doublePattern = /^[0-9]*\.[0-9]{1,15}$/;
-  const stringPattern = /^"[^"]*"$/;
-  const charPattern = /^'[^']{1}'$/;
 
   const lines = fileContent?.split("\n") || [];
   let allValid = true;
@@ -33,12 +28,7 @@ export const syntaxAnalysis = (fileContent, setAnalysisResult, setIsSyntaxAnalyz
         return `Incomplete assignment after '${identifier}'`;
       }
 
-      const value = tokens[3];
       const semicolon = tokens[4];
-
-      if (!validateAssignmentValue(type, value)) {
-        return `Invalid value '${value}' for type '${type}'`;
-      }
 
       if (semicolon !== ";") {
         return "Missing or misplaced semicolon after assignment";
@@ -50,25 +40,6 @@ export const syntaxAnalysis = (fileContent, setAnalysisResult, setIsSyntaxAnalyz
     }
 
     return null;
-  };
-
-  const validateAssignmentValue = (type, value) => {
-    switch (type) {
-      case "int":
-        return integerPattern.test(value);
-      case "String":
-        return stringPattern.test(value);
-      case "boolean":
-        return value === "true" || value === "false";
-      case "float":
-        return floatPattern.test(value);
-      case "double":
-        return doublePattern.test(value);
-      case "char":
-        return charPattern.test(value);
-      default:
-        return false;
-    }
   };
 
   for (const line of lines) {
