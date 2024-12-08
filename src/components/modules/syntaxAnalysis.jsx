@@ -4,7 +4,7 @@ export const syntaxAnalysis = (fileContent, setAnalysisResult, setIsSyntaxAnalyz
 
   const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
   const integerPattern = /^[0-9]+$/;
-  const floatPattern = /^[0-9]*\.[0-9]{1,7}$/;
+  const floatPattern = /^[0-9]*\.[0-9]{1,7}[fF]?$/; 
   const doublePattern = /^[0-9]*\.[0-9]{1,15}$/;
   const stringPattern = /^"[^"]*"$/;
   const charPattern = /^'[^']{1}'$/;
